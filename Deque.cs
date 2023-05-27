@@ -26,85 +26,98 @@ public class Deque
 
     public void PushBack(Item newitem) //Добавить в конец
     {
-        if (head == null) //2
+        Program.N_OP++;
+        if (head == null) //1
         {
+            Program.N_OP++;
             head = newitem; //1
         }
         else
         {                                        //Если дэк пустой то добавляем элемент который будет являться и головой и хвостом
+            Program.N_OP += 4;
             tail.next = newitem;     //2            //Иначе новый элемент теперь следующий для прежнего хвоста а хвост теперь предыдущий для нового элемента
             newitem.previous = tail; //2     
         }
+        Program.N_OP += 2;
         tail = newitem; //1
         len++; //1
-        Program.N_OP += 6;
     }
 
     public void PushFront(Item newitem) //Добавить в начало
     {
+        Program.N_OP += 5;
         Item? temp = head; //1
         newitem.next = temp;  //2                 //Создаем промежуточную переменную temp которой присваиваем значение головы для обмена значениями между головой и следующего для головы элемента
         head = newitem; //1
-        if (head == null)   //2                   //Если дэк пустой то добавляем элемент который теперь является и головой и хвостом
-        {                                      
+        if (head == null)   //1                   //Если дэк пустой то добавляем элемент который теперь является и головой и хвостом
+        {
+            Program.N_OP++;
             tail = head; //1
         }
         else
         {                                     //Иначе новый элемент это предыдущий для temp которая является бывшей головой
+            Program.N_OP += 2;
             temp.previous = newitem; //2
         }
+        Program.N_OP++;
         len++; //1
-        Program.N_OP += 8;
     }
 
     public Item PopBack() //Удаление с конца
     {
-        if (head == null) //2
+        Program.N_OP++;
+        if (head == null) //1
             throw new InvalidOperationException("Deque is empty");  //Ошибка если дэк пустой
+        Program.N_OP+=2;
         Item? output = tail; //1
-        if(len == 1)    //2    //Если в дэке один элемент то присваиваем output значение этого элемента и указываем что голова и хвост теперь null
+        if(len == 1)    //1    //Если в дэке один элемент то присваиваем output значение этого элемента и указываем что голова и хвост теперь null
         {
+            Program.N_OP += 2;
             head = tail = null; //2
         }
         else                       //Иначе хвостом теперь будет предыдущий для хвоста элемент
         {
+            Program.N_OP += 4;
             tail = tail.previous; //2
             tail.next = null; //2
         }
+        Program.N_OP++;
         len--; //1
-        Program.N_OP += 8;
         return output;
     }
 
     public Item PopFront() //Удаление с начала
     {
+        Program.N_OP += 3;
         if (this.isEmpty()) //3
             throw new InvalidOperationException("Deque is empty"); //Ошибка если дэк пустой
+        Program.N_OP += 6;
         Item? output = head; //1
         head = head.next;   //2                   //Присваиваем для головы новое значение(следующий в дэке элемент)
         output.next = null; //2
         len--;//1
-        Program.N_OP += 9;
         return output;
     }
 
     public int Get(int index) //Чтение элемента по индексу
     {
+        Program.N_OP += 3;
         int result = 0; //1
         if (isEmpty()) //2
             throw new InvalidOperationException("Deque is empty"); //Ошибка если дэк пустой
 
-        if (index > len) //2
+        Program.N_OP++;
+        if (index > len) //1
         {
             throw new Exception("Out of range");      //Ошибка при выходе за границы дэка
         }
 
 
-        Program.N_OP += 9;
-        if (index > (len / 2) - 1)   //4          //Если индекс находится правее середины то быстрее будет начать перебор дэка с конца(1)
+        Program.N_OP += 3;
+        if (index > (len / 2) - 1)   //3         //Если индекс находится правее середины то быстрее будет начать перебор дэка с конца(1)
         {
             Program.N_OP += 4;
-            for (int i = 0; i < (len - index - 1); i++)//4
+            for (int i = 0; i < (len - index - 1); i++)//4    //14 + 6*(n-1) = 
             {
                 PushFront(PopBack());//2 //(1)    Чтобы дойти до нужного элемента с конца мы удаляем элемент с конца и добавляем его в начало
                 Program.N_OP += 6;
@@ -146,16 +159,18 @@ public class Deque
 
     public void Set(int index, int value) // Изменение элемента по индексу
     {                                      //Аналогично Get только с изменением значения
+        Program.N_OP += 2;
         if (isEmpty()) //2
             throw new InvalidOperationException("Deque is empty");
 
-        if (index > len) //2
+        Program.N_OP++;
+        if (index > len) //1
         {
             throw new Exception("Out of range");
         }
 
-        Program.N_OP += 8;
-        if (index > (len / 2) - 1) //4
+        Program.N_OP += 3;
+        if (index > (len / 2) - 1) //3
         {
             Program.N_OP += 4;
             for (int i = 0; i < (len - index - 1); i++) //4
@@ -173,6 +188,7 @@ public class Deque
                 PushBack(PopFront());//2
                 Program.N_OP += 6;
             }
+            return;
         }
         else
         {
@@ -186,6 +202,7 @@ public class Deque
             head.value = value;//2
             Program.N_OP += 2;
 
+            Program.N_OP += 2;
             for (int i = 0; i < index; i++) //2
             {
                 PushFront(PopBack()); //2
@@ -215,8 +232,8 @@ public class Deque
         Program.N_OP += 2;
         for (int i = 1; i < len; i++) //2
         {
-            Program.N_OP += 3;
-            int key = this[i]; //3// Ключ (сортируемый элемент);
+            Program.N_OP += 2;
+            int key = this[i]; //2 // Ключ (сортируемый элемент);
             Program.N_OP += 1;
             int left = 0;   //1    // Левая граница отсортированной части;
             Program.N_OP += 2;
@@ -224,14 +241,14 @@ public class Deque
 
             // Бинарный поиск в отсортированной части дэка.
             // 2
-            Program.N_OP += 2;
+            Program.N_OP += 1;
             while (left <= right)
             {
                 Program.N_OP += 3;
                 int middle = (left + right) / 2; //3
 
-                //4
-                Program.N_OP += 4;
+                //2
+                Program.N_OP += 2;
                 if (this[middle] > key)
                 {
                     Program.N_OP += 2;
@@ -248,12 +265,12 @@ public class Deque
             Program.N_OP += 3;
             for (int j = i - 1; j >= left; j--) //3
             {
-                Program.N_OP += 4;
+                Program.N_OP += 6;
                 this[j + 1] = this[j]; //4
             }
 
-            Program.N_OP += 3;
-            this[left] = key; //3 // Вставка ключа на его место в отсортированной части.
+            Program.N_OP += 2;
+            this[left] = key; //2 // Вставка ключа на его место в отсортированной части.
         }
     }
 
